@@ -1,13 +1,23 @@
 console.log("Reading from STDIN")
 
 const day = Bun.argv[2]
+const part = Bun.argv[3]
 
-if (!day) {
-  throw new Error("You gotta pick a day!")
+if (!day || !part) {
+  throw new Error("You gotta pick a day and part!")
 }
 
-const { run } = await import(`./${day}/${day}`)
+const exports = await import(`./${day}/${day}`)
 
 const text = await Bun.stdin.text()
 
-console.log(run(text))
+switch (part) {
+  case "1":
+    console.log(exports.part1(text))
+    break
+  case "2":
+    console.log(exports.part2(text))
+    break
+  default:
+    throw new Error(`Unknown part: ${part}`)
+}

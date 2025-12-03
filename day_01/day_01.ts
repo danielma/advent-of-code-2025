@@ -62,7 +62,7 @@ function execute(dial: DialState, command: Command) {
   }
 }
 
-export function run(input: string) {
+export function part1(input: string) {
   return input
     .trim()
     .split("\n")

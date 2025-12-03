@@ -1,41 +1,41 @@
 import { expect, describe, it } from "bun:test"
-import { run } from "./day_01"
+import { part1 } from "./day_01"
 
 describe("Day 1", () => {
   describe("Part 1", () => {
     describe("simple instructions", () => {
       it("can turn left a couple", async () => {
-        expect(run("L3").location).toEqual(47)
+        expect(part1("L3").location).toEqual(47)
       })
 
       it("can turn right a couple", async () => {
-        expect(run("R16").location).toEqual(66)
+        expect(part1("R16").location).toEqual(66)
       })
 
       it("a specific example", async () => {
-        expect(run("S5\nL10").location).toEqual(95)
+        expect(part1("S5\nL10").location).toEqual(95)
       })
 
       it("can turn to 0", async () => {
-        expect(run("L50").location).toEqual(0)
+        expect(part1("L50").location).toEqual(0)
       })
 
       it("can turn right past 0", async () => {
-        expect(run("S99\nR1").location).toEqual(0)
+        expect(part1("S99\nR1").location).toEqual(0)
       })
 
       it("can turn left past 0", async () => {
-        expect(run("L99").location).toEqual(51)
+        expect(part1("L99").location).toEqual(51)
       })
     })
 
     describe("zero tracking", () => {
       it("initial state", async () => {
-        expect(run("S2").zeroes).toEqual(0)
+        expect(part1("S2").zeroes).toEqual(0)
       })
 
       it("hits 0", async () => {
-        expect(run("L50").zeroes).toEqual(1)
+        expect(part1("L50").zeroes).toEqual(1)
       })
     })
 
@@ -54,7 +54,7 @@ L82
 `
 
       it("returns the right password", async () => {
-        expect(run(input).zeroes).toEqual(3)
+        expect(part1(input).zeroes).toEqual(3)
       })
     })
   })
