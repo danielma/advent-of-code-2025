@@ -16,49 +16,68 @@ function parseCommand(line: string): Command {
   }
 }
 
-function loopAddition(n: number, additive: number) {
+function loopAddition(n: number, additive: number, loops = 0): DialState {
   const added = n + additive
   const remainder = added - RULES.max
 
   if (remainder > 0) {
-    return loopAddition(RULES.min, remainder - 1)
+    return loopAddition(RULES.min, remainder - 1, loops + 1)
   } else {
-    return added
+    return { location: added, zeroes: loops }
   }
 }
 
-function loopSubtraction(n: number, subtractive: number) {
+function loopSubtraction(n: number, subtractive: number, loops = 0): DialState {
   const subtracted = n - subtractive
   const remainder = RULES.min - subtracted
 
-  if (remainder > 0) {
-    return loopSubtraction(RULES.max, remainder - 1)
+  if (subtracted === 0) {
+    return { location: subtracted, zeroes: loops + 1 }
+  } else if (remainder > 0) {
+    return loopSubtraction(
+      RULES.max,
+      remainder - 1,
+      n === 0 ? loops : loops + 1
+    )
   } else {
-    return subtracted
+    return { location: subtracted, zeroes: loops }
   }
 }
 
-function executeCommand(dial: DialState["location"], command: Command) {
-  // console.log("execute", dial, command)
+function executeCommand(
+  dial: DialState["location"],
+  command: Command
+): DialState {
   switch (command[0]) {
     case "left":
       return loopSubtraction(dial, command[1])
     case "right":
       return loopAddition(dial, command[1])
     case "set":
-      return command[1]
+      return { location: command[1], zeroes: 0 }
     default:
       throw new Error(`Unusable rotation ${command}`)
   }
 }
 
-function execute(dial: DialState, command: Command) {
-  const nextLocation = executeCommand(dial.location, command)
+function executePartOne(dial: DialState, command: Command) {
+  const nextState = executeCommand(dial.location, command)
 
-  if (nextLocation === 0) {
-    return { location: nextLocation, zeroes: dial.zeroes + 1 }
+  if (nextState.location === 0) {
+    return { location: nextState.location, zeroes: dial.zeroes + 1 }
   } else {
-    return { location: nextLocation, zeroes: dial.zeroes }
+    return { location: nextState.location, zeroes: dial.zeroes }
+  }
+}
+
+function executePartTwo(dial: DialState, command: Command) {
+  // console.log("state", dial)
+  // console.log(command)
+  const nextState = executeCommand(dial.location, command)
+
+  return {
+    location: nextState.location,
+    zeroes: dial.zeroes + nextState.zeroes,
   }
 }
 
@@ -66,7 +85,17 @@ export function part1(input: string) {
   return input
     .trim()
     .split("\n")
-    .reduce((state, line) => execute(state, parseCommand(line)), {
+    .reduce((state, line) => executePartOne(state, parseCommand(line)), {
+      location: RULES.initial,
+      zeroes: 0,
+    })
+}
+
+export function part2(input: string) {
+  return input
+    .trim()
+    .split("\n")
+    .reduce((state, line) => executePartTwo(state, parseCommand(line)), {
       location: RULES.initial,
       zeroes: 0,
     })
