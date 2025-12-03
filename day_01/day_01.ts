@@ -30,17 +30,12 @@ function loopAddition(n: number, additive: number, loops = 0): DialState {
 function loopSubtraction(n: number, subtractive: number, loops = 0): DialState {
   const subtracted = n - subtractive
   const remainder = RULES.min - subtracted
+  const nextLoops = RULES.min < n && subtracted <= RULES.min ? loops + 1 : loops
 
-  if (subtracted === 0) {
-    return { location: subtracted, zeroes: loops + 1 }
-  } else if (remainder > 0) {
-    return loopSubtraction(
-      RULES.max,
-      remainder - 1,
-      n === 0 ? loops : loops + 1
-    )
+  if (remainder > 0) {
+    return loopSubtraction(RULES.max, remainder - 1, nextLoops)
   } else {
-    return { location: subtracted, zeroes: loops }
+    return { location: subtracted, zeroes: nextLoops }
   }
 }
 
