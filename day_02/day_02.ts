@@ -1,8 +1,8 @@
-function isRepeatingSequence(input: string) {
-  if (input.length % 2 === 0) {
-    const firstHalf = input.substring(0, input.length / 2)
+function checkForRepeatingSequence(input: string, parts: number) {
+  if (input.length % parts === 0) {
+    const firstPart = input.substring(0, input.length / parts)
 
-    return firstHalf.repeat(2) === input
+    return firstPart.repeat(parts) === input
   } else {
     return false
   }
@@ -14,7 +14,10 @@ function* range(startAt: number, endAt: number) {
   }
 }
 
-function processRange(input: string) {
+function processRange(
+  input: string,
+  doWeCareAboutThisNumber: (input: string) => boolean
+) {
   const [rawStartAt = "", rawEndAt = rawStartAt] = input.split("-")
 
   const startAt = parseInt(rawStartAt, 10)
@@ -22,7 +25,7 @@ function processRange(input: string) {
 
   return range(startAt, endAt).reduce(
     (acc, element) =>
-      isRepeatingSequence(element.toString()) ? [...acc, element] : acc,
+      doWeCareAboutThisNumber(element.toString()) ? [...acc, element] : acc,
     [] as number[]
   )
 }
@@ -31,9 +34,29 @@ function sum(numbers: number[]) {
   return numbers.reduce((acc, el) => acc + el, 0)
 }
 
-export function part1(input: string) {
+function processInput(
+  input: string,
+  isNumberInvalid: (input: string) => boolean
+) {
   const invalids = input
     .split(",")
-    .reduce((acc, elem) => acc.concat(processRange(elem)), [] as number[])
+    .reduce(
+      (acc, elem) => acc.concat(processRange(elem, isNumberInvalid)),
+      [] as number[]
+    )
   return { invalids, total: sum(invalids) }
+}
+
+export function part1(input: string) {
+  return processInput(input, (sequence) =>
+    checkForRepeatingSequence(sequence, 2)
+  )
+}
+
+export function part2(input: string) {
+  return processInput(input, (sequence) =>
+    range(2, sequence.length).some((count) =>
+      checkForRepeatingSequence(sequence, count)
+    )
+  )
 }
