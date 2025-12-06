@@ -1,5 +1,12 @@
 import { describe, it, expect } from "bun:test"
-import { part1 } from "./day_03"
+import { part1, part2 } from "./day_03"
+
+const testInput = `
+987654321111111
+811111111111119
+234234234234278
+818181911112111
+`
 
 describe("Day 3", () => {
   describe("part 1", () => {
@@ -28,16 +35,20 @@ describe("Day 3", () => {
 
     describe("lists of banks", () => {
       it("works with test inputs", async () => {
-        const testInput = `
-987654321111111
-811111111111119
-234234234234278
-818181911112111
-`
-
         expect(part1(testInput)).toEqual({
           joltages: [98, 89, 78, 92],
           total: 357,
+        })
+      })
+    })
+  })
+
+  describe("part 2", () => {
+    describe("test input", () => {
+      it("works", async () => {
+        expect(part2(testInput)).toEqual({
+          joltages: [987654321111, 811111111119, 434234234278, 888911112111],
+          total: 3121910778619,
         })
       })
     })
