@@ -1,8 +1,8 @@
 const ROLL = "@"
 const EMPTY = "."
 
-type Grid = string[][]
 type Point = { x: number; y: number }
+type Grid = { grid: string[][]; size: { x: number; y: number } }
 
 function generatePointsToCheck(
   x: number,
@@ -21,52 +21,86 @@ function generatePointsToCheck(
 
   const points: Point[] = []
 
-  if (northIsValid) {
-    if (westIsValid) points.push({ x: west, y: north })
-
-    points.push({ x, y: north })
-
-    if (eastIsValid) points.push({ x: east, y: north })
-  }
+  if (northIsValid && westIsValid) points.push({ x: west, y: north })
+  if (northIsValid) points.push({ x, y: north })
+  if (northIsValid && eastIsValid) points.push({ x: east, y: north })
 
   if (westIsValid) points.push({ x: west, y })
   if (eastIsValid) points.push({ x: east, y })
 
-  if (southIsValid) {
-    if (westIsValid) points.push({ x: west, y: south })
-
-    points.push({ x, y: south })
-
-    if (eastIsValid) points.push({ x: east, y: south })
-  }
+  if (southIsValid && westIsValid) points.push({ x: west, y: south })
+  if (southIsValid) points.push({ x, y: south })
+  if (southIsValid && eastIsValid) points.push({ x: east, y: south })
 
   return points
 }
 
-export function part1(input: string) {
+function makeGrid(input: string): Grid {
   const trimmed = input.trim()
 
   const grid = trimmed.split("\n").map((line) => line.split(""))
-  const gridSize = { x: grid[0]!.length, y: grid.length }
+  const size = { x: grid[0]!.length, y: grid.length }
+
+  return { grid, size }
+}
+
+function gridAt(grid: Grid["grid"], { x, y }: Point) {
+  return grid[y]![x]!
+}
+
+function gridWrite(grid: Grid["grid"], { x, y }: Point, value: string) {
+  grid[y]![x] = value
+}
+
+function* walkGrid(grid: Grid["grid"]) {
+  for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[y]!.length; x++) {
+      yield { char: grid[y]![x]!, x, y }
+    }
+  }
+}
+
+function removableRolls(grid: Grid) {
   const rollLocations: Point[] = []
 
-  grid.forEach((row, y) =>
-    row.forEach((char, x) => {
-      if (char === EMPTY) {
-        return
-      } else {
-        const points = generatePointsToCheck(x, y, { size: gridSize })
+  for (let { char, x, y } of walkGrid(grid.grid)) {
+    if (char === EMPTY) {
+      continue
+    } else {
+      const points = generatePointsToCheck(x, y, { size: grid.size })
 
-        const pointsFull = points
-          .map((p) => grid[p.y]![p.x]!)
-          .filter((c) => c === ROLL).length
+      const pointsWithRoll = points
+        .map((p) => gridAt(grid.grid, p))
+        .filter((c) => c === ROLL).length
 
-        if (pointsFull < 4) rollLocations.push({ x, y })
-      }
-    })
-  )
-
-  // console.log(grid)
+      if (pointsWithRoll < 4) rollLocations.push({ x, y })
+    }
+  }
 
   return { rollLocations, total: rollLocations.length }
+}
+
+export function part1(input: string) {
+  const grid = makeGrid(input)
+
+  return removableRolls(grid)
+}
+
+export function part2(input: string) {
+  const grid = makeGrid(input)
+
+  let total = 0
+  let removable = removableRolls(grid)
+
+  while (removable.total > 0) {
+    total += removable.total
+
+    removable.rollLocations.forEach((p) => {
+      gridWrite(grid.grid, p, EMPTY)
+    })
+
+    removable = removableRolls(grid)
+  }
+
+  return total
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test"
-import { part1 } from "./day_04"
+import { part1, part2 } from "./day_04"
 
 const testInput = `..@@.@@@@.
 @@@.@.@.@@
@@ -61,6 +61,12 @@ describe("Day 4", () => {
 
     it("works with test input", async () => {
       expect(part1(testInput).total).toEqual(13)
+    })
+  })
+
+  describe("Part 2", () => {
+    it("I'm not even gonna try to explain", async () => {
+      expect(part2(testInput)).toEqual(43)
     })
   })
 })
