@@ -1,14 +1,18 @@
+import { filterMap } from "../utils"
+
 const ROLL = "@"
 const EMPTY = "."
 
 type Point = { x: number; y: number }
-type Grid = { grid: string[][]; size: { x: number; y: number } }
+type Grid = string[][]
 
-function generatePointsToCheck(
-  x: number,
-  y: number,
-  { size }: { size: { x: number; y: number } }
-) {
+function generatePointsToCheck({
+  point: { x, y },
+  size,
+}: {
+  point: Point
+  size: Point
+}) {
   const north = y - 1
   const south = y + 1
   const east = x + 1
@@ -36,54 +40,54 @@ function generatePointsToCheck(
 }
 
 function makeGrid(input: string): Grid {
-  const trimmed = input.trim()
-
-  const grid = trimmed.split("\n").map((line) => line.split(""))
-  const size = { x: grid[0]!.length, y: grid.length }
-
-  return { grid, size }
+  return input
+    .trim()
+    .split("\n")
+    .map((line) => line.split(""))
 }
 
-function gridAt(grid: Grid["grid"], { x, y }: Point) {
+function gridSize(grid: Grid) {
+  return { x: grid[0]!.length, y: grid.length }
+}
+
+function gridAt(grid: Grid, { x, y }: Point) {
   return grid[y]![x]!
 }
 
-function gridWrite(grid: Grid["grid"], { x, y }: Point, value: string) {
+function gridWrite(grid: Grid, { x, y }: Point, value: string) {
   grid[y]![x] = value
 }
 
-function* walkGrid(grid: Grid["grid"]) {
+function* walkGrid(grid: Grid) {
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[y]!.length; x++) {
-      yield { char: grid[y]![x]!, x, y }
+      yield { char: grid[y]![x]!, point: { x, y } }
     }
   }
 }
 
 function removableRolls(grid: Grid) {
-  const rollLocations: Point[] = []
+  const size = gridSize(grid)
 
-  for (let { char, x, y } of walkGrid(grid.grid)) {
-    if (char === EMPTY) {
-      continue
-    } else {
-      const points = generatePointsToCheck(x, y, { size: grid.size })
+  return filterMap(walkGrid(grid), ({ char, point }) => {
+    if (char === ROLL) {
+      const pointsWithRoll = generatePointsToCheck({ point, size })
+        .map((p) => gridAt(grid, p))
+        .filter((c) => c === ROLL)
 
-      const pointsWithRoll = points
-        .map((p) => gridAt(grid.grid, p))
-        .filter((c) => c === ROLL).length
-
-      if (pointsWithRoll < 4) rollLocations.push({ x, y })
+      if (pointsWithRoll.length < 4) {
+        return point
+      }
     }
-  }
-
-  return { rollLocations, total: rollLocations.length }
+  })
 }
 
 export function part1(input: string) {
   const grid = makeGrid(input)
 
-  return removableRolls(grid)
+  const locations = removableRolls(grid)
+
+  return { rollLocations: locations, total: locations.length }
 }
 
 export function part2(input: string) {
@@ -92,11 +96,11 @@ export function part2(input: string) {
   let total = 0
   let removable = removableRolls(grid)
 
-  while (removable.total > 0) {
-    total += removable.total
+  while (removable.length > 0) {
+    total += removable.length
 
-    removable.rollLocations.forEach((p) => {
-      gridWrite(grid.grid, p, EMPTY)
+    removable.forEach((p) => {
+      gridWrite(grid, p, EMPTY)
     })
 
     removable = removableRolls(grid)
