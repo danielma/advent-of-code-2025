@@ -1,10 +1,6 @@
-const defaultDigit = { number: 0, index: -1 }
+import { range, sum } from "../utils"
 
-function* range(startIndex: number, endIndex: number) {
-  for (let index = startIndex; index < endIndex; index++) {
-    yield index
-  }
-}
+const defaultDigit = { number: 0, index: -1 }
 
 function joltageForBank(bank: string, allowedDigits: number) {
   let previousDigit = { ...defaultDigit }
@@ -58,8 +54,4 @@ export function part1(input: string) {
 
 export function part2(input: string) {
   return processBanks(input, (bank) => joltageForBank(bank, 12))
-}
-
-function sum(numbers: number[]) {
-  return numbers.reduce((acc, num) => acc + num, 0)
 }
